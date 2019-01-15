@@ -1,0 +1,223 @@
+PUT opensuse-mail-security
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "affected_products_list": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 128
+            }
+          }
+        },
+        "announcement_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "cross_reference": {
+          "type": "text"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "EEE, d MMM yyyy HH:mm:ss Z || EEE,  d MMM yyyy HH:mm:ss Z"
+        },
+        "msg_body": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "origin": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "rating": {
+          "type": "keyword",
+          "ignore_above": 64
+        },
+        "reference": {
+          "type": "text"
+        },
+        "reference_link": {
+          "type": "text"
+        },
+        "src_link": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "subject": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": "3",
+      "number_of_replicas": "1"
+    }
+  }
+}
+
+PUT test-opensuse-mail-updates
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "affected_products_list": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 128
+            }
+          }
+        },
+        "announcement_id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "cross_reference": {
+          "type": "text"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "EEE, d MMM yyyy HH:mm:ss Z || EEE,  d MMM yyyy HH:mm:ss Z"
+        },
+        "msg_body": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "origin": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "rating": {
+          "type": "keyword",
+          "ignore_above": 64
+        },
+        "reference": {
+          "type": "text"
+        },
+        "reference_link": {
+          "type": "text"
+        },
+        "src_link": {
+          "type": "keyword",
+          "ignore_above": 128
+        },
+        "subject": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": "3",
+      "number_of_replicas": "1"
+    }
+  }
+}
+
+PUT opensuse-mail-bugs
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "date": {
+          "type": "date",
+          "format": "EEE, d MMM yyyy HH:mm:ss Z || EEE,  d MMM yyyy HH:mm:ss Z"
+        },
+        "msg_body": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "origin": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "reference_link": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "src_link": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "subject": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": "3",
+      "number_of_replicas": "1"
+    }
+  }
+}
+
+PUT opensuse-mail-announce
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "date": {
+          "type": "date",
+          "format": "EEE, d MMM yyyy HH:mm:ss Z || EEE,  d MMM yyyy HH:mm:ss Z"
+        },
+        "msg_body": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "origin": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "reference_link": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "src_link": {
+          "type": "keyword",
+          "ignore_above": 512
+        },
+        "subject": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": "3",
+      "number_of_replicas": "1"
+    }
+  }
+}
