@@ -2,9 +2,32 @@
 
 This project contains the pipelines used in SDC and Elastic index mapping for Opensuse Mailing List Data. Created for ease of replication
 
+## SDC Pipelines
+
+There are 2 types of pipeline included in this mail, the first is a simple pipeline which only tail the file and directly feed it to elasticsearch, the second one is doing a little bit of data transformation to create new fields
+
+Heres what is looks like :
+
+- Pipeline 1 [opensuse-bugs and opensuse-announce]
+
+    ![pipeline1](images/pipeline1.png)
+
+  This pipeline has not much going in it since the format of the mails in `opensuse-bugs` and `opensuse-announce` is more various and has no "structure" to it. If there is suggestion for improvements please do open an Issue and have a conversation there.
+
+- Pipeline 2 [opensuse-updates and opensuse-security-announce]
+
+    ![pipeline2](images/pipeline2.png)
+
+  This pipeline will generate and/or transform some fields before feeding it to elasticsearch, because it will be useful to do some aggregations on these new fields. These fields includes :
+
+  - `cross_reference` - CVEs and such
+  - `affected_product_list` - The list of affected products that is announced
+  - `timestamp` - Had to format the raw data in some way so elasticsearch can properly parse it as a Date Type
+  - `announcement_id` - This field will be used as an `_id` field for the document
+
 ## Getting Started
 
-Cloning this repository to your local system 
+Clone this repository to your local system 
 
 ```
 $ git clone .,,
@@ -44,7 +67,7 @@ This project contains 2 files for Elastic, `elastic-devtools.txt` and `elastic-c
 
 ## Versioning
    
-Versioning being used for tracking releases.
+Semantic Versioning
 
 ## Known issues
    
