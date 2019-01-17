@@ -1,11 +1,11 @@
 {
   "pipelineConfig" : {
     "schemaVersion" : 6,
-    "version" : 10,
-    "pipelineId" : "opensusesecurity826ea500-3d12-4fd8-8842-201080f4ba7f",
-    "title" : "opensuse-security",
+    "version" : 11,
+    "pipelineId" : "opensuseupdateselk57bce128-0c31-4b5f-8fed-8284d64d7241",
+    "title" : "opensuse-updates-elk",
     "description" : "",
-    "uuid" : "2eff7492-e7cc-4b8d-927d-276a6a2a5f30",
+    "uuid" : "96d1a7ef-1706-4112-9172-3ecfa98ae326",
     "configuration" : [ {
       "name" : "executionMode",
       "value" : "STANDALONE"
@@ -177,10 +177,10 @@
     },
     "fragments" : [ ],
     "stages" : [ {
-      "instanceName" : "Directory_01",
+      "instanceName" : "FileTail_01",
       "library" : "streamsets-datacollector-basic-lib",
-      "stageName" : "com_streamsets_pipeline_stage_origin_spooldir_SpoolDirDSource",
-      "stageVersion" : "10",
+      "stageName" : "com_streamsets_pipeline_stage_origin_logtail_FileTailDSource",
+      "stageVersion" : "4",
       "configuration" : [ {
         "name" : "conf.dataFormatConfig.compression",
         "value" : "NONE"
@@ -195,13 +195,13 @@
         "value" : false
       }, {
         "name" : "conf.dataFormatConfig.textMaxLineLen",
-        "value" : 819229
+        "value" : 1024
       }, {
         "name" : "conf.dataFormatConfig.useCustomDelimiter",
-        "value" : true
+        "value" : false
       }, {
         "name" : "conf.dataFormatConfig.customDelimiter",
-        "value" : "From opensuse-security-announce"
+        "value" : "\\r\\n"
       }, {
         "name" : "conf.dataFormatConfig.includeCustomDelimiterInTheText",
         "value" : false
@@ -311,6 +311,9 @@
         "name" : "conf.dataFormatConfig.log4jCustomLogFormat",
         "value" : "%r [%t] %-5p %c %x - %m%n"
       }, {
+        "name" : "conf.dataFormatConfig.avroSchemaSource",
+        "value" : null
+      }, {
         "name" : "conf.dataFormatConfig.avroSchema",
         "value" : null
       }, {
@@ -377,53 +380,33 @@
         "name" : "conf.dataFormatConfig.rateLimit",
         "value" : "-1"
       }, {
+        "name" : "conf.dataFormatConfig.verifyChecksum",
+        "value" : false
+      }, {
         "name" : "conf.dataFormatConfig.excelHeader",
         "value" : null
       }, {
         "name" : "conf.dataFormat",
         "value" : "JSON"
       }, {
-        "name" : "conf.spoolDir",
-        "value" : "/sdc/opensuse_mail/security"
-      }, {
-        "name" : "conf.numberOfThreads",
-        "value" : 1
-      }, {
-        "name" : "conf.pathMatcherMode",
-        "value" : "GLOB"
-      }, {
-        "name" : "conf.filePattern",
-        "value" : "*.json"
-      }, {
-        "name" : "conf.useLastModified",
-        "value" : "TIMESTAMP"
-      }, {
-        "name" : "conf.processSubdirectories",
-        "value" : true
-      }, {
-        "name" : "conf.allowLateDirectory",
-        "value" : true
-      }, {
-        "name" : "conf.overrunLimit",
-        "value" : 128
+        "name" : "conf.multiLineMainPattern",
+        "value" : null
       }, {
         "name" : "conf.batchSize",
         "value" : 1000
       }, {
-        "name" : "conf.poolingTimeoutSecs",
-        "value" : 60
-      }, {
-        "name" : "conf.maxSpoolFiles",
-        "value" : 1000
-      }, {
-        "name" : "conf.spoolingPeriod",
+        "name" : "conf.maxWaitTimeSecs",
         "value" : 5
       }, {
-        "name" : "conf.initialFileToProcess",
-        "value" : null
+        "name" : "conf.fileInfos",
+        "value" : [ {
+          "fileRollMode" : "DATE_YYYY_MM",
+          "patternForToken" : ".*",
+          "fileFullPath" : "/opt/scrapyd/data/opensuse-updates/*/*.json"
+        } ]
       }, {
-        "name" : "conf.errorArchiveDir",
-        "value" : null
+        "name" : "conf.allowLateDirectories",
+        "value" : false
       }, {
         "name" : "conf.postProcessing",
         "value" : "NONE"
@@ -431,13 +414,11 @@
         "name" : "conf.archiveDir",
         "value" : null
       }, {
-        "name" : "conf.retentionTimeMins",
-        "value" : 0
-      }, {
         "name" : "stageOnRecordError",
         "value" : "TO_ERROR"
       } ],
       "uiInfo" : {
+        "outputStreamLabels" : [ "Data", "Metadata" ],
         "yPos" : 50,
         "stageType" : "SOURCE",
         "rawSource" : {
@@ -446,11 +427,11 @@
           } ]
         },
         "description" : "",
-        "label" : "Local Directory",
-        "xPos" : 60
+        "label" : "File Tail 1",
+        "xPos" : 91
       },
       "inputLanes" : [ ],
-      "outputLanes" : [ "Directory_01OutputLane15468430284340" ],
+      "outputLanes" : [ "FileTail_01OutputLane15476337156560", "FileTail_01OutputLane15476337156561" ],
       "eventLanes" : [ ],
       "services" : [ ]
     }, {
@@ -487,7 +468,7 @@
         "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
-      "inputLanes" : [ "Directory_01OutputLane15468430284340" ],
+      "inputLanes" : [ "FileTail_01OutputLane15476337156560" ],
       "outputLanes" : [ "JythonEvaluator_01OutputLane15475231506320" ],
       "eventLanes" : [ ],
       "services" : [ ]
@@ -555,6 +536,9 @@
       }, {
         "name" : "stageRecordPreconditions",
         "value" : [ ]
+      }, {
+        "name" : "constant",
+        "value" : null
       } ],
       "uiInfo" : {
         "description" : "",
@@ -607,7 +591,7 @@
         "description" : "",
         "label" : "Split the details",
         "xPos" : 940,
-        "yPos" : 49,
+        "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
       "inputLanes" : [ "FieldRemover_01OutputLane15475232628300" ],
@@ -644,8 +628,8 @@
       "uiInfo" : {
         "description" : "",
         "label" : "Jython Evaluator 2",
-        "xPos" : 1077,
-        "yPos" : 203,
+        "xPos" : 1160,
+        "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
       "inputLanes" : [ "FieldSplitter_02OutputLane15475232778660" ],
@@ -691,7 +675,7 @@
       "uiInfo" : {
         "description" : "",
         "label" : "date split timezone",
-        "xPos" : 1160,
+        "xPos" : 1380,
         "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
@@ -716,12 +700,15 @@
       }, {
         "name" : "stageRecordPreconditions",
         "value" : [ ]
+      }, {
+        "name" : "constant",
+        "value" : null
       } ],
       "uiInfo" : {
         "description" : "",
         "label" : "Remove trash from details",
-        "xPos" : 1380,
-        "yPos" : 49,
+        "xPos" : 1600,
+        "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
       "inputLanes" : [ "FieldSplitter_04OutputLane15475354930400" ],
@@ -767,7 +754,7 @@
       "uiInfo" : {
         "description" : "",
         "label" : "split affected products to a list",
-        "xPos" : 1600,
+        "xPos" : 1820,
         "yPos" : 50,
         "stageType" : "PROCESSOR"
       },
@@ -779,7 +766,7 @@
       "instanceName" : "Elasticsearch_01",
       "library" : "streamsets-datacollector-elasticsearch_5-lib",
       "stageName" : "com_streamsets_pipeline_stage_destination_elasticsearch_ElasticSearchDTarget",
-      "stageVersion" : "8",
+      "stageVersion" : "10",
       "configuration" : [ {
         "name" : "elasticSearchConfig.timeDriver",
         "value" : "${time:now()}"
@@ -788,7 +775,7 @@
         "value" : "UTC"
       }, {
         "name" : "elasticSearchConfig.indexTemplate",
-        "value" : "test-opensuse-mail-security"
+        "value" : "opensuse-mail-updates"
       }, {
         "name" : "elasticSearchConfig.typeTemplate",
         "value" : "_doc"
@@ -812,7 +799,7 @@
         "value" : "DISCARD"
       }, {
         "name" : "elasticSearchConfig.securityConfig.securityUser",
-        "value" : "username:password"
+        "value" : "user:password"
       }, {
         "name" : "elasticSearchConfig.securityConfig.sslTrustStorePath",
         "value" : null
@@ -830,7 +817,7 @@
         "value" : false
       }, {
         "name" : "elasticSearchConfig.useSecurity",
-        "value" : false
+        "value" : true
       }, {
         "name" : "stageOnRecordError",
         "value" : "TO_ERROR"
@@ -840,15 +827,50 @@
       }, {
         "name" : "stageRecordPreconditions",
         "value" : [ ]
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.securityMode",
+        "value" : "BASIC"
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsRegion",
+        "value" : "US_EAST_2"
+      }, {
+        "name" : "elasticSearchConfig.rawAdditionalProperties",
+        "value" : "{\n}"
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.endpoint",
+        "value" : null
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsAccessKeyId",
+        "value" : null
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsSecretAccessKey",
+        "value" : null
       } ],
       "uiInfo" : {
         "description" : "",
         "label" : "Elasticsearch 1",
-        "xPos" : 1820,
-        "yPos" : 47,
+        "xPos" : 2041,
+        "yPos" : 50,
         "stageType" : "TARGET"
       },
       "inputLanes" : [ "FieldSplitter_03OutputLane15475303720040" ],
+      "outputLanes" : [ ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "Trash_01",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_destination_devnull_NullDTarget",
+      "stageVersion" : "1",
+      "configuration" : [ ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Trash 1",
+        "xPos" : 300,
+        "yPos" : 248,
+        "stageType" : "TARGET"
+      },
+      "inputLanes" : [ "FileTail_01OutputLane15476337156561" ],
       "outputLanes" : [ ],
       "eventLanes" : [ ],
       "services" : [ ]
@@ -872,22 +894,22 @@
       "services" : [ ]
     },
     "info" : {
-      "pipelineId" : "opensusesecurity826ea500-3d12-4fd8-8842-201080f4ba7f",
-      "title" : "opensuse-security",
+      "pipelineId" : "opensuseupdateselk57bce128-0c31-4b5f-8fed-8284d64d7241",
+      "title" : "opensuse-updates-elk",
       "description" : "",
-      "created" : 1547543704526,
-      "lastModified" : 1547543704705,
-      "creator" : "testuser",
-      "lastModifier" : "testuser",
+      "created" : 1547624119941,
+      "lastModified" : 1547633746164,
+      "creator" : "admin",
+      "lastModifier" : "admin",
       "lastRev" : "0",
-      "uuid" : "2eff7492-e7cc-4b8d-927d-276a6a2a5f30",
+      "uuid" : "96d1a7ef-1706-4112-9172-3ecfa98ae326",
       "valid" : true,
       "metadata" : {
         "labels" : [ ]
       },
-      "name" : "opensusesecurity826ea500-3d12-4fd8-8842-201080f4ba7f",
-      "sdcVersion" : "3.6.1",
-      "sdcId" : "e37e9969-0420-11e9-908f-65d15066bce4"
+      "name" : "opensuseupdateselk57bce128-0c31-4b5f-8fed-8284d64d7241",
+      "sdcVersion" : "3.7.0",
+      "sdcId" : "fe0fd89f-1950-11e9-8d27-a1f1348daec7"
     },
     "metadata" : {
       "labels" : [ ]
@@ -1184,8 +1206,8 @@
     "valid" : true,
     "issues" : {
       "pipelineIssues" : [ ],
-      "issueCount" : 0,
-      "stageIssues" : { }
+      "stageIssues" : { },
+      "issueCount" : 0
     },
     "previewable" : true
   },
@@ -1250,7 +1272,7 @@
     } ],
     "dataRuleDefinitions" : [ ],
     "driftRuleDefinitions" : [ ],
-    "uuid" : "e5b0ecf2-da04-4541-8ba8-2b82935d23eb",
+    "uuid" : "d8e8494e-2dc4-42c8-908c-8686c1bc0db9",
     "configuration" : [ {
       "name" : "emailIDs",
       "value" : [ ]

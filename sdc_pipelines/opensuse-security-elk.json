@@ -1,11 +1,11 @@
 {
   "pipelineConfig" : {
     "schemaVersion" : 6,
-    "version" : 10,
-    "pipelineId" : "opensusebugs552bf977-fcc9-46de-a61b-12556dd2c928",
-    "title" : "opensuse-bugs",
+    "version" : 11,
+    "pipelineId" : "opensusesecurityelkaddf7bfb-8b63-427f-8bc0-0b1d0f658ffe",
+    "title" : "opensuse-security-elk",
     "description" : "",
-    "uuid" : "1bab8990-9466-4cc6-abed-1a57b7a1f4e4",
+    "uuid" : "bba48328-4c28-4482-859e-0fdc79d76f61",
     "configuration" : [ {
       "name" : "executionMode",
       "value" : "STANDALONE"
@@ -177,10 +177,10 @@
     },
     "fragments" : [ ],
     "stages" : [ {
-      "instanceName" : "Directory_01",
+      "instanceName" : "FileTail_01",
       "library" : "streamsets-datacollector-basic-lib",
-      "stageName" : "com_streamsets_pipeline_stage_origin_spooldir_SpoolDirDSource",
-      "stageVersion" : "10",
+      "stageName" : "com_streamsets_pipeline_stage_origin_logtail_FileTailDSource",
+      "stageVersion" : "4",
       "configuration" : [ {
         "name" : "conf.dataFormatConfig.compression",
         "value" : "NONE"
@@ -195,13 +195,13 @@
         "value" : false
       }, {
         "name" : "conf.dataFormatConfig.textMaxLineLen",
-        "value" : 819229
+        "value" : 1024
       }, {
         "name" : "conf.dataFormatConfig.useCustomDelimiter",
-        "value" : true
+        "value" : false
       }, {
         "name" : "conf.dataFormatConfig.customDelimiter",
-        "value" : "From opensuse-security-announce"
+        "value" : "\\r\\n"
       }, {
         "name" : "conf.dataFormatConfig.includeCustomDelimiterInTheText",
         "value" : false
@@ -311,6 +311,9 @@
         "name" : "conf.dataFormatConfig.log4jCustomLogFormat",
         "value" : "%r [%t] %-5p %c %x - %m%n"
       }, {
+        "name" : "conf.dataFormatConfig.avroSchemaSource",
+        "value" : null
+      }, {
         "name" : "conf.dataFormatConfig.avroSchema",
         "value" : null
       }, {
@@ -377,53 +380,33 @@
         "name" : "conf.dataFormatConfig.rateLimit",
         "value" : "-1"
       }, {
+        "name" : "conf.dataFormatConfig.verifyChecksum",
+        "value" : false
+      }, {
         "name" : "conf.dataFormatConfig.excelHeader",
         "value" : null
       }, {
         "name" : "conf.dataFormat",
         "value" : "JSON"
       }, {
-        "name" : "conf.spoolDir",
-        "value" : "/sdc/opensuse_mail/bugs"
-      }, {
-        "name" : "conf.numberOfThreads",
-        "value" : 1
-      }, {
-        "name" : "conf.pathMatcherMode",
-        "value" : "GLOB"
-      }, {
-        "name" : "conf.filePattern",
-        "value" : "*.json"
-      }, {
-        "name" : "conf.useLastModified",
-        "value" : "TIMESTAMP"
-      }, {
-        "name" : "conf.processSubdirectories",
-        "value" : true
-      }, {
-        "name" : "conf.allowLateDirectory",
-        "value" : true
-      }, {
-        "name" : "conf.overrunLimit",
-        "value" : 128
+        "name" : "conf.multiLineMainPattern",
+        "value" : null
       }, {
         "name" : "conf.batchSize",
         "value" : 1000
       }, {
-        "name" : "conf.poolingTimeoutSecs",
-        "value" : 60
-      }, {
-        "name" : "conf.maxSpoolFiles",
-        "value" : 1000
-      }, {
-        "name" : "conf.spoolingPeriod",
+        "name" : "conf.maxWaitTimeSecs",
         "value" : 5
       }, {
-        "name" : "conf.initialFileToProcess",
-        "value" : null
+        "name" : "conf.fileInfos",
+        "value" : [ {
+          "fileRollMode" : "DATE_YYYY_MM",
+          "patternForToken" : ".*",
+          "fileFullPath" : "/opt/scrapyd/data/opensuse-security-announce/*/*json"
+        } ]
       }, {
-        "name" : "conf.errorArchiveDir",
-        "value" : null
+        "name" : "conf.allowLateDirectories",
+        "value" : false
       }, {
         "name" : "conf.postProcessing",
         "value" : "NONE"
@@ -431,14 +414,12 @@
         "name" : "conf.archiveDir",
         "value" : null
       }, {
-        "name" : "conf.retentionTimeMins",
-        "value" : 0
-      }, {
         "name" : "stageOnRecordError",
         "value" : "TO_ERROR"
       } ],
       "uiInfo" : {
-        "yPos" : 95,
+        "outputStreamLabels" : [ "Data", "Metadata" ],
+        "yPos" : 110,
         "stageType" : "SOURCE",
         "rawSource" : {
           "configuration" : [ {
@@ -446,18 +427,346 @@
           } ]
         },
         "description" : "",
-        "label" : "Local Directory",
-        "xPos" : 740
+        "label" : "File Tail 1",
+        "xPos" : 60
       },
       "inputLanes" : [ ],
-      "outputLanes" : [ "Directory_01OutputLane15468430284340" ],
+      "outputLanes" : [ "FileTail_01OutputLane15476337788410", "FileTail_01OutputLane15476337788411" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "JythonEvaluator_01",
+      "library" : "streamsets-datacollector-jython_2_7-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_jython_JythonDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "processingMode",
+        "value" : "BATCH"
+      }, {
+        "name" : "initScript",
+        "value" : "#\n# Available Objects:\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#\n\n# state['connection'] = Connection().open()"
+      }, {
+        "name" : "script",
+        "value" : "#\n# Available constants: \n#   They are to assign a type to a field with a value null.\n#   NULL_BOOLEAN, NULL_CHAR, NULL_BYTE, NULL_SHORT, NULL_INTEGER, NULL_LONG\n#   NULL_FLOATNULL_DOUBLE, NULL_DATE, NULL_DATETIME, NULL_TIME, NULL_DECIMAL\n#   NULL_BYTE_ARRAY, NULL_STRING, NULL_LIST, NULL_MAP\n# \n# Available Objects:\n# \n#  records: an array of records to process, depending on Jython processor\n#           processing mode it may have 1 record or all the records in the batch.\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#\n#  output.write(record): writes a record to processor output\n#\n#  error.write(record, message): sends a record to error\n#\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createRecord(String recordId): Creates a new record.\n#                            Pass a recordId to uniquely identify the record and include enough information to track down the record source. \n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#\n#  sdcFunctions.createEvent(String type, int version): Creates a new event.\n#                            Create new empty event with standard headers.\n#  sdcFunctions.toEvent(Record): Send event to event stream\n#                            Only events created with sdcFunctions.createEvent are supported.\n#  sdcFunctions.isPreview(): Determine if pipeline is in preview mode.\n#\n# Available Record Header Variables:\n#\n#  record.attributes: a map of record header attributes.\n#\n#  record.<header name>: get the value of 'header name'.\n#\n# Add additional module search paths:\n#import sys\n#sys.path.append('/some/other/dir/to/search')\n\n# Sample Jython code\nfor record in records:\n  try:\n    record.value['preprocessing'] = record.value['msg_body']\n    # Change record root field value to a STRING value\n    #record.value = 'Hello '\n\n\n    # Change record root field value to a MAP value and create an entry\n    #record.value = { 'V' : 'Hello'}\n\n    # Access a MAP entry\n    #record.value['X'] = record.value['V'] + ' World'\n\n    # Modify a MAP entry\n    #record.value['V'] = 5\n\n    # Create an ARRAY entry\n    #record.value['A'] = [ 'Element 1', 'Element 2' ]\n\n    # Access an ARRAY entry\n    #record.value['B'] = record.value['A'][0]\n\n    # Modify an existing ARRAY entry\n    #record.value['A'][0] = 100\n\n    # Assign a integer type to a field and value null\n    # record.value['null_int'] = NULL_INTEGER \n\n    # Check if the field is NULL_INTEGER(Both '==' and 'is' work). If so, assign a value \n    # if sdcFunctions.getFieldNull(record, '/null_int') == NULL_INTEGER:\n    #    record.value['null_int'] = 123\n\n    # Create a new record with map field \n    # newRecord = sdcFunctions.createRecord(record.sourceId + ':newRecordId')\n    # newRecord.value = {'field1' : 'val1', 'field2' : 'val2'}\n    # output.write(newRecord)\n\n    # Applies if the source uses WHOLE_FILE as data format\n    # input_stream = record.value['fileRef'].getInputStream()\n    # try:\n    #   input_stream.read() #Process the input stream\n    # finally:  \n    #   input_stream.close()\n\n    # Modify a record header attribute entry\n    #record.attributes['name'] = record.attributes['first_name'] + ' ' + record.attributes['last_name']\n\n    # Get a record header with field names ex. get sourceId and errorCode\n    #sourceId = record.sourceId\n    #errorCode = ''\n    #if record.errorCode:\n    #   errorCode = record.errorCode\n\n    # Write record to processor output\n    output.write(record)\n\n  except Exception as e:\n    # Send record to error\n    error.write(record, str(e))"
+      }, {
+        "name" : "destroyScript",
+        "value" : "#\n# Available Objects:\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#  sdcFunctions.createEvent(String type, int version): Creates a new event.\n#                            Create new empty event with standard headers.\n#  sdcFunctions.toEvent(Record): Send event to event stream\n#                            Only events created with sdcFunctions.createEvent are supported.\n#\n\n# state['connection'].close()"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Jython Evaluator / Duplicating body",
+        "xPos" : 280,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FileTail_01OutputLane15476337788410" ],
+      "outputLanes" : [ "JythonEvaluator_01OutputLane15475231506320" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldSplitter_01",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_splitter_SplitterDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "fieldPath",
+        "value" : "/preprocessing"
+      }, {
+        "name" : "separator",
+        "value" : "______________________________________________________________________________"
+      }, {
+        "name" : "fieldPathsForSplits",
+        "value" : [ "/subjectbody", "/details", "/body" ]
+      }, {
+        "name" : "onStagePreConditionFailure",
+        "value" : "CONTINUE"
+      }, {
+        "name" : "tooManySplitsAction",
+        "value" : "TO_LAST_FIELD"
+      }, {
+        "name" : "remainingSplitsPath",
+        "value" : null
+      }, {
+        "name" : "originalFieldAction",
+        "value" : "REMOVE"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Get the details of the body",
+        "xPos" : 500,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "JythonEvaluator_01OutputLane15475231506320" ],
+      "outputLanes" : [ "FieldSplitter_01OutputLane15475203385520" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldRemover_01",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_fieldfilter_FieldFilterDProcessor",
+      "stageVersion" : "1",
+      "configuration" : [ {
+        "name" : "filterOperation",
+        "value" : "REMOVE"
+      }, {
+        "name" : "fields",
+        "value" : [ "/subjectbody", "/body" ]
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      }, {
+        "name" : "constant",
+        "value" : null
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Remove trash from duplicated body",
+        "xPos" : 720,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FieldSplitter_01OutputLane15475203385520" ],
+      "outputLanes" : [ "FieldRemover_01OutputLane15475232628300" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldSplitter_02",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_splitter_SplitterDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "fieldPath",
+        "value" : "/details"
+      }, {
+        "name" : "separator",
+        "value" : "\\nAnnouncement\\sID:\\s*|\\nRating:\\s*|\\nReferences:\\s*|\\nCross\\-References:\\s*|\\nAffected\\sProducts:\\s*"
+      }, {
+        "name" : "fieldPathsForSplits",
+        "value" : [ "/trash1", "/announcement_id", "/rating", "/reference", "/4", "/5" ]
+      }, {
+        "name" : "onStagePreConditionFailure",
+        "value" : "CONTINUE"
+      }, {
+        "name" : "tooManySplitsAction",
+        "value" : "TO_LAST_FIELD"
+      }, {
+        "name" : "remainingSplitsPath",
+        "value" : null
+      }, {
+        "name" : "originalFieldAction",
+        "value" : "REMOVE"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Split the details",
+        "xPos" : 940,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FieldRemover_01OutputLane15475232628300" ],
+      "outputLanes" : [ "FieldSplitter_02OutputLane15475232778660" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "JythonEvaluator_02",
+      "library" : "streamsets-datacollector-jython_2_7-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_jython_JythonDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "processingMode",
+        "value" : "BATCH"
+      }, {
+        "name" : "initScript",
+        "value" : "#\n# Available Objects:\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#\n\n# state['connection'] = Connection().open()"
+      }, {
+        "name" : "script",
+        "value" : "#\n# Available constants: \n#   They are to assign a type to a field with a value null.\n#   NULL_BOOLEAN, NULL_CHAR, NULL_BYTE, NULL_SHORT, NULL_INTEGER, NULL_LONG\n#   NULL_FLOATNULL_DOUBLE, NULL_DATE, NULL_DATETIME, NULL_TIME, NULL_DECIMAL\n#   NULL_BYTE_ARRAY, NULL_STRING, NULL_LIST, NULL_MAP\n# \n# Available Objects:\n# \n#  records: an array of records to process, depending on Jython processor\n#           processing mode it may have 1 record or all the records in the batch.\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#\n#  output.write(record): writes a record to processor output\n#\n#  error.write(record, message): sends a record to error\n#\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createRecord(String recordId): Creates a new record.\n#                            Pass a recordId to uniquely identify the record and include enough information to track down the record source. \n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#\n#  sdcFunctions.createEvent(String type, int version): Creates a new event.\n#                            Create new empty event with standard headers.\n#  sdcFunctions.toEvent(Record): Send event to event stream\n#                            Only events created with sdcFunctions.createEvent are supported.\n#  sdcFunctions.isPreview(): Determine if pipeline is in preview mode.\n#\n# Available Record Header Variables:\n#\n#  record.attributes: a map of record header attributes.\n#\n#  record.<header name>: get the value of 'header name'.\n#\n# Add additional module search paths:\n#import sys\n#sys.path.append('/some/other/dir/to/search')\n\n# Sample Jython code\nfor record in records:\n  try:\n    # Change record root field value to a STRING value\n    #record.value = 'Hello '\n    if record.value['4'] != None:\n      if record.value['4'].find('CVE') > -1:\n        record.value['cross_reference'] = record.value['4']\n        record.value['affected_products'] = record.value['5']\n      else:\n        record.value['cross_reference'] = None\n        record.value['affected_products'] = record.value['5']\n    else:\n      record.value['cross_reference'] = None\n      record.value['affected_products'] = None\n    # Change record root field value to a MAP value and create an entry\n    #record.value = { 'V' : 'Hello'}\n    \n    # Access a MAP entry\n    #record.value['X'] = record.value['V'] + ' World'\n\n    # Modify a MAP entry\n    #record.value['V'] = 5\n\n    # Create an ARRAY entry\n    #record.value['A'] = [ 'Element 1', 'Element 2' ]\n\n    # Access an ARRAY entry\n    #record.value['B'] = record.value['A'][0]\n\n    # Modify an existing ARRAY entry\n    #record.value['A'][0] = 100\n\n    # Assign a integer type to a field and value null\n    # record.value['null_int'] = NULL_INTEGER \n\n    # Check if the field is NULL_INTEGER(Both '==' and 'is' work). If so, assign a value \n    # if sdcFunctions.getFieldNull(record, '/null_int') == NULL_INTEGER:\n    #    record.value['null_int'] = 123\n\n    # Create a new record with map field \n    # newRecord = sdcFunctions.createRecord(record.sourceId + ':newRecordId')\n    # newRecord.value = {'field1' : 'val1', 'field2' : 'val2'}\n    # output.write(newRecord)\n\n    # Applies if the source uses WHOLE_FILE as data format\n    # input_stream = record.value['fileRef'].getInputStream()\n    # try:\n    #   input_stream.read() #Process the input stream\n    # finally:  \n    #   input_stream.close()\n\n    # Modify a record header attribute entry\n    #record.attributes['name'] = record.attributes['first_name'] + ' ' + record.attributes['last_name']\n\n    # Get a record header with field names ex. get sourceId and errorCode\n    #sourceId = record.sourceId\n    #errorCode = ''\n    #if record.errorCode:\n    #   errorCode = record.errorCode\n\n    # Write record to processor output\n    output.write(record)\n\n  except Exception as e:\n    # Send record to error\n    error.write(record, str(e))"
+      }, {
+        "name" : "destroyScript",
+        "value" : "#\n# Available Objects:\n#\n#  state: a dict that is preserved between invocations of this script. \n#         Useful for caching bits of data e.g. counters.\n#\n#  log.<loglevel>(msg, obj...): use instead of print to send log messages to the log4j log instead of stdout.\n#                               loglevel is any log4j level: e.g. info, error, warn, trace.\n#  sdcFunctions.getFieldNull(Record, 'field path'): Receive a constant defined above \n#                                  to check if the field is typed field with value null\n#  sdcFunctions.createMap(boolean listMap): Create a map for use as a field in a record.\n#                            Pass True to this function to create a list map (ordered map)\n#  sdcFunctions.createEvent(String type, int version): Creates a new event.\n#                            Create new empty event with standard headers.\n#  sdcFunctions.toEvent(Record): Send event to event stream\n#                            Only events created with sdcFunctions.createEvent are supported.\n#\n\n# state['connection'].close()"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Jython Evaluator 2",
+        "xPos" : 1160,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FieldSplitter_02OutputLane15475232778660" ],
+      "outputLanes" : [ "JythonEvaluator_02OutputLane15475421208820" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldSplitter_04",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_splitter_SplitterDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "fieldPath",
+        "value" : "/date"
+      }, {
+        "name" : "separator",
+        "value" : "\\s\\("
+      }, {
+        "name" : "fieldPathsForSplits",
+        "value" : [ "/timestamp", "/trash2" ]
+      }, {
+        "name" : "onStagePreConditionFailure",
+        "value" : "CONTINUE"
+      }, {
+        "name" : "tooManySplitsAction",
+        "value" : "TO_LAST_FIELD"
+      }, {
+        "name" : "remainingSplitsPath",
+        "value" : null
+      }, {
+        "name" : "originalFieldAction",
+        "value" : "REMOVE"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "date split timezone",
+        "xPos" : 1380,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "JythonEvaluator_02OutputLane15475421208820" ],
+      "outputLanes" : [ "FieldSplitter_04OutputLane15475354930400" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldRemover_02",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_fieldfilter_FieldFilterDProcessor",
+      "stageVersion" : "1",
+      "configuration" : [ {
+        "name" : "filterOperation",
+        "value" : "REMOVE"
+      }, {
+        "name" : "fields",
+        "value" : [ "/trash1", "/trash2", "/4", "/5" ]
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      }, {
+        "name" : "constant",
+        "value" : null
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Remove trash from details",
+        "xPos" : 1600,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FieldSplitter_04OutputLane15475354930400" ],
+      "outputLanes" : [ "FieldRemover_02OutputLane15475296647090" ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "FieldSplitter_03",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_processor_splitter_SplitterDProcessor",
+      "stageVersion" : "2",
+      "configuration" : [ {
+        "name" : "fieldPath",
+        "value" : "/affected_products"
+      }, {
+        "name" : "separator",
+        "value" : "\\n"
+      }, {
+        "name" : "fieldPathsForSplits",
+        "value" : [ ]
+      }, {
+        "name" : "onStagePreConditionFailure",
+        "value" : "CONTINUE"
+      }, {
+        "name" : "tooManySplitsAction",
+        "value" : "TO_LIST"
+      }, {
+        "name" : "remainingSplitsPath",
+        "value" : "/affected_product_list"
+      }, {
+        "name" : "originalFieldAction",
+        "value" : "REMOVE"
+      }, {
+        "name" : "stageOnRecordError",
+        "value" : "TO_ERROR"
+      }, {
+        "name" : "stageRequiredFields",
+        "value" : [ ]
+      }, {
+        "name" : "stageRecordPreconditions",
+        "value" : [ ]
+      } ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "split affected products to a list",
+        "xPos" : 1820,
+        "yPos" : 40,
+        "stageType" : "PROCESSOR"
+      },
+      "inputLanes" : [ "FieldRemover_02OutputLane15475296647090" ],
+      "outputLanes" : [ "FieldSplitter_03OutputLane15475303720040" ],
       "eventLanes" : [ ],
       "services" : [ ]
     }, {
       "instanceName" : "Elasticsearch_01",
       "library" : "streamsets-datacollector-elasticsearch_5-lib",
       "stageName" : "com_streamsets_pipeline_stage_destination_elasticsearch_ElasticSearchDTarget",
-      "stageVersion" : "8",
+      "stageVersion" : "10",
       "configuration" : [ {
         "name" : "elasticSearchConfig.timeDriver",
         "value" : "${time:now()}"
@@ -466,13 +775,13 @@
         "value" : "UTC"
       }, {
         "name" : "elasticSearchConfig.indexTemplate",
-        "value" : "pre-opensuse-mail-bugs"
+        "value" : "opensuse-mail-security"
       }, {
         "name" : "elasticSearchConfig.typeTemplate",
         "value" : "_doc"
       }, {
         "name" : "elasticSearchConfig.docIdTemplate",
-        "value" : ""
+        "value" : "${record:value('/announcement_id')}"
       }, {
         "name" : "elasticSearchConfig.parentIdTemplate",
         "value" : null
@@ -490,7 +799,7 @@
         "value" : "DISCARD"
       }, {
         "name" : "elasticSearchConfig.securityConfig.securityUser",
-        "value" : "username:password"
+        "value" : "user:password"
       }, {
         "name" : "elasticSearchConfig.securityConfig.sslTrustStorePath",
         "value" : null
@@ -508,7 +817,7 @@
         "value" : false
       }, {
         "name" : "elasticSearchConfig.useSecurity",
-        "value" : false
+        "value" : true
       }, {
         "name" : "stageOnRecordError",
         "value" : "TO_ERROR"
@@ -518,15 +827,50 @@
       }, {
         "name" : "stageRecordPreconditions",
         "value" : [ ]
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.securityMode",
+        "value" : "BASIC"
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsRegion",
+        "value" : "US_EAST_2"
+      }, {
+        "name" : "elasticSearchConfig.rawAdditionalProperties",
+        "value" : "{\n}"
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.endpoint",
+        "value" : null
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsAccessKeyId",
+        "value" : null
+      }, {
+        "name" : "elasticSearchConfig.securityConfig.awsSecretAccessKey",
+        "value" : null
       } ],
       "uiInfo" : {
         "description" : "",
         "label" : "Elasticsearch 1",
-        "xPos" : 1021,
-        "yPos" : 108,
+        "xPos" : 2040,
+        "yPos" : 40,
         "stageType" : "TARGET"
       },
-      "inputLanes" : [ "Directory_01OutputLane15468430284340" ],
+      "inputLanes" : [ "FieldSplitter_03OutputLane15475303720040" ],
+      "outputLanes" : [ ],
+      "eventLanes" : [ ],
+      "services" : [ ]
+    }, {
+      "instanceName" : "Trash_01",
+      "library" : "streamsets-datacollector-basic-lib",
+      "stageName" : "com_streamsets_pipeline_stage_destination_devnull_NullDTarget",
+      "stageVersion" : "1",
+      "configuration" : [ ],
+      "uiInfo" : {
+        "description" : "",
+        "label" : "Trash 1",
+        "xPos" : 280,
+        "yPos" : 170,
+        "stageType" : "TARGET"
+      },
+      "inputLanes" : [ "FileTail_01OutputLane15476337788411" ],
       "outputLanes" : [ ],
       "eventLanes" : [ ],
       "services" : [ ]
@@ -550,22 +894,22 @@
       "services" : [ ]
     },
     "info" : {
-      "pipelineId" : "opensusebugs552bf977-fcc9-46de-a61b-12556dd2c928",
-      "title" : "opensuse-bugs",
+      "pipelineId" : "opensusesecurityelkaddf7bfb-8b63-427f-8bc0-0b1d0f658ffe",
+      "title" : "opensuse-security-elk",
       "description" : "",
-      "created" : 1546847556858,
-      "lastModified" : 1547543995714,
+      "created" : 1547624069550,
+      "lastModified" : 1547633847867,
       "creator" : "admin",
-      "lastModifier" : "testuser",
+      "lastModifier" : "admin",
       "lastRev" : "0",
-      "uuid" : "1bab8990-9466-4cc6-abed-1a57b7a1f4e4",
+      "uuid" : "bba48328-4c28-4482-859e-0fdc79d76f61",
       "valid" : true,
       "metadata" : {
         "labels" : [ ]
       },
-      "name" : "opensusebugs552bf977-fcc9-46de-a61b-12556dd2c928",
-      "sdcVersion" : "3.6.1",
-      "sdcId" : "e37e9969-0420-11e9-908f-65d15066bce4"
+      "name" : "opensusesecurityelkaddf7bfb-8b63-427f-8bc0-0b1d0f658ffe",
+      "sdcVersion" : "3.7.0",
+      "sdcId" : "fe0fd89f-1950-11e9-8d27-a1f1348daec7"
     },
     "metadata" : {
       "labels" : [ ]
@@ -862,8 +1206,8 @@
     "valid" : true,
     "issues" : {
       "pipelineIssues" : [ ],
-      "issueCount" : 0,
-      "stageIssues" : { }
+      "stageIssues" : { },
+      "issueCount" : 0
     },
     "previewable" : true
   },
@@ -928,7 +1272,7 @@
     } ],
     "dataRuleDefinitions" : [ ],
     "driftRuleDefinitions" : [ ],
-    "uuid" : "77aebffa-9ca9-43ed-b987-340729f64e10",
+    "uuid" : "8dabb64d-0d2b-4b04-9a4b-412ca136248a",
     "configuration" : [ {
       "name" : "emailIDs",
       "value" : [ ]
