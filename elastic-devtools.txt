@@ -1,10 +1,12 @@
-PUT opensuse-mail-security
+PUT _template/opensuse-updates-template
 {
+  "index_patterns": ["opensuse-mail-updates*"],
   "mappings": {
     "_doc": {
       "properties": {
-        "affected_products_list": {
+        "affected_product_list": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -52,6 +54,7 @@ PUT opensuse-mail-security
         },
         "subject": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -64,19 +67,21 @@ PUT opensuse-mail-security
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }
 
-PUT test-opensuse-mail-updates
+PUT _template/opensuse-security-template
 {
+  "index_patterns": ["opensuse-mail-security*"],
   "mappings": {
     "_doc": {
       "properties": {
-        "affected_products_list": {
+        "affected_product_list": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -124,6 +129,7 @@ PUT test-opensuse-mail-updates
         },
         "subject": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -136,14 +142,15 @@ PUT test-opensuse-mail-updates
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }
 
-PUT opensuse-mail-bugs
+PUT _template/opensuse-mail-bugs-template
 {
+  "index_patterns": ["opensuse-mail-bugs*"],
   "mappings": {
     "_doc": {
       "properties": {
@@ -176,14 +183,15 @@ PUT opensuse-mail-bugs
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }
 
-PUT opensuse-mail-announce
+PUT _template/opensuse-mail-announce-template
 {
+  "index_patterns": ["opensuse-mail-announce*"],
   "mappings": {
     "_doc": {
       "properties": {
@@ -216,7 +224,7 @@ PUT opensuse-mail-announce
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }

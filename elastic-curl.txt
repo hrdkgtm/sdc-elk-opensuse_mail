@@ -1,10 +1,12 @@
-curl -XPUT "http://localhost:9200/opensuse-mail-security" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/_template/opensuse-updates-template" -H 'Content-Type: application/json' -d'
 {
+  "index_patterns": ["opensuse-mail-updates*"],
   "mappings": {
     "_doc": {
       "properties": {
-        "affected_products_list": {
+        "affected_product_list": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -52,6 +54,7 @@ curl -XPUT "http://localhost:9200/opensuse-mail-security" -H 'Content-Type: appl
         },
         "subject": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -64,19 +67,21 @@ curl -XPUT "http://localhost:9200/opensuse-mail-security" -H 'Content-Type: appl
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }'
 
-curl -XPUT "http://localhost:9200/test-opensuse-mail-updates" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/_template/opensuse-security-template" -H 'Content-Type: application/json' -d'
 {
+  "index_patterns": ["opensuse-mail-security*"],
   "mappings": {
     "_doc": {
       "properties": {
-        "affected_products_list": {
+        "affected_product_list": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -124,6 +129,7 @@ curl -XPUT "http://localhost:9200/test-opensuse-mail-updates" -H 'Content-Type: 
         },
         "subject": {
           "type": "text",
+          "analyzer": "english",
           "fields": {
             "keyword": {
               "type": "keyword",
@@ -136,14 +142,15 @@ curl -XPUT "http://localhost:9200/test-opensuse-mail-updates" -H 'Content-Type: 
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }'
 
-curl -XPUT "http://localhost:9200/opensuse-mail-bugs" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/_template/opensuse-mail-bugs-template" -H 'Content-Type: application/json' -d'
 {
+  "index_patterns": ["opensuse-mail-bugs*"],
   "mappings": {
     "_doc": {
       "properties": {
@@ -176,14 +183,15 @@ curl -XPUT "http://localhost:9200/opensuse-mail-bugs" -H 'Content-Type: applicat
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
 }'
 
-curl -XPUT "http://localhost:9200/opensuse-mail-announce" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/_template/opensuse-mail-announce-template" -H 'Content-Type: application/json' -d'
 {
+  "index_patterns": ["opensuse-mail-announce*"],
   "mappings": {
     "_doc": {
       "properties": {
@@ -216,7 +224,7 @@ curl -XPUT "http://localhost:9200/opensuse-mail-announce" -H 'Content-Type: appl
   },
   "settings": {
     "index": {
-      "number_of_shards": "3",
+      "number_of_shards": "5",
       "number_of_replicas": "1"
     }
   }
