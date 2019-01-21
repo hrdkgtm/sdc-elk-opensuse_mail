@@ -176,7 +176,13 @@ PUT _template/opensuse-mail-bugs-template
         },
         "subject": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "english",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         }
       }
     }
@@ -217,7 +223,13 @@ PUT _template/opensuse-mail-announce-template
         },
         "subject": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "english",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         }
       }
     }

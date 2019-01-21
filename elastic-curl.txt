@@ -176,7 +176,13 @@ curl -XPUT "http://localhost:9200/_template/opensuse-mail-bugs-template" -H 'Con
         },
         "subject": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "english",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         }
       }
     }
@@ -217,7 +223,13 @@ curl -XPUT "http://localhost:9200/_template/opensuse-mail-announce-template" -H 
         },
         "subject": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "english",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         }
       }
     }
